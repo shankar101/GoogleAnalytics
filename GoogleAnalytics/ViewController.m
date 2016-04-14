@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "INTGoogleAnalyticsHandler.h"
 
 @interface ViewController ()
 
@@ -16,6 +17,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [[INTGoogleAnalyticsHandler sharedInstance]trackScreen:@"BaseClass"];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -24,4 +26,8 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)pressok:(id)sender {
+    
+    [[INTGoogleAnalyticsHandler sharedInstance]trackClickEvent:@"Name_tracking" Action:@"Ok tap" Label:@"Ok call " Value:1];
+}
 @end

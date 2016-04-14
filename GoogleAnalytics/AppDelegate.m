@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import "INTGoogleAnalyticsHandler.h"
+#define SYSTEM_VERSION [[[UIDevice currentDevice] systemVersion] floatValue]
 
 @interface AppDelegate ()
 
@@ -17,9 +19,48 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    [[INTGoogleAnalyticsHandler sharedInstance] setTrackingID:@"ABC"];
+    NSDictionary *userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+    NSDictionary *apsInfo = [userInfo objectForKey:@"aps"];
+    NSLog(@"%@",apsInfo);
+    if (SYSTEM_VERSION >= 8.0) {
+        
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:(UIRemoteNotificationTypeBadge
+                                                                                             |UIRemoteNotificationTypeSound
+                                                                                             |UIRemoteNotificationTypeAlert) categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    }
+    else {
+        
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+         (UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
+    }
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     return YES;
 }
+#pragma mark-  Remote Notification Delegate
 
+- (void)application:(UIApplication *)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    
+    NSString *str = [NSString stringWithFormat:@"%@",deviceToken];
+    NSLog(@"Device token is %@", str);
+    
+    str = [str stringByReplacingOccurrencesOfString:@"<" withString:@""];
+    str = [str stringByReplacingOccurrencesOfString:@">" withString:@""];
+    str = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
+    NSLog(@"Device token after space replacing --  %@", str);
+}
+- (void)application:(UIApplication *)app didFailToRegisterForRemoteNotificationsWithError:(NSError *)err
+{
+    NSLog(@"%@",err);
+}
+-(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    NSLog(@"%@",userInfo);
+}
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
